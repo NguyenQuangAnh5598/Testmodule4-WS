@@ -13,7 +13,9 @@
         function getCity(city) {
             return `<tr><td>${city.cityName}</td><td>${city.nation.nationName}</td><td>${city.area}</td><td>${city.population}</td><td>${city.gdp}</td>`
                 +  `<td>${city.description}</td>`
-                +  `<td><button type="submit"  value="${city.id}" onclick="editForm(this)">Edit</button></td>
+                +  `<td><button type="button" class="btn btn-primary" data-toggle="modal" onclick="editForm(this)" value="${city.id}" data-target="#edit">
+    Edit City
+</button></td>
                 <td><button type="submit"  value="${city.id}" onclick="deleteCity(this)">Delete</button></td></tr>`;
         }
 
@@ -45,7 +47,7 @@
 
         function addNewCity() {
             let cityName = $("#cityName").val();
-            let nation = $("#nation").val;
+            let nation = $("#nation").val();
             let area = $("#area").val();
             let population = $("#population").val();
             let gdp = $("#gdp").val();
@@ -104,8 +106,57 @@
             })
         }
         listNation("nation");
+        listNation("editnation");
 
+        function editForm(a) {
+            let id = a.getAttribute("value");
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:8080/city/findOne/" + id,
+                success: function (city) {
+                    $('#editId').val(city.id);
+                    $('#editcityName').val(city.cityName);
+                    $('#editarea').val(city.area);
+                    $('#editpopulation').val(city.population);
+                    $('#editgdp').val(city.gdp);
+                    $('#editpopulation').val(city.population);
+                    $('#editdescription').val(city.description);
+                    $('#editnation').val(city.nation.nationName);
+                }
+            })
+            event.preventDefault();
+        }
 
+        function updateCity() {
+            let id = $("#editId").val();
+            let cityName = $("#editcityName").val();
+            let nation = $("#editnation").val();
+            let area = $("#editarea").val();
+            let population = $("#editpopulation").val();
+            let gdp = $("#editgdp").val();
+            let description = $("#editdescription").val();
+            let newCity = {
+                id : id,
+                cityName: cityName,
+                area: area,
+                population: population,
+                gdp: gdp,
+                description: description,
+                nation: {
+                    id: nation
+                }
+            }
+            $.ajax({
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                type: "PUT",
+                data: JSON.stringify(newCity),
+                url: "http://localhost:8080/city/edit",
+                success: showList
+            })
+        }
 
     </script>
 </head>
@@ -115,6 +166,7 @@
 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
     Create City
 </button>
+
 <br>
 
 
@@ -122,8 +174,58 @@
 <table border="1" id="cityList">
 </table>
 
-<h3>Update Form</h3>
+<!-------------------------------------Edit------------------------------------------>
+<div class="modal fade" id="edit" tabindex="-1" role="dialog" aria-labelledby="editmodal"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editmodal">Edit Customer</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table>
+                    <tr>
+                        <td>City Name:</td>
+                        <td><input type="text" id="editcityName" placeholder="City Name"></td>
+                    </tr>
+                    <tr>
+                        <td>Areas :</td>
+                        <td><input type="text" id="editarea" placeholder="area"></td>
+                    </tr>
+                    <tr>
+                        <td>Population :</td>
+                        <td><input type="text" id="editpopulation" placeholder="population"></td>
+                    </tr>
+                    <tr>
+                        <td>GDP :</td>
+                        <td><input type="text" id="editgdp" placeholder="gdp"></td>
+                    </tr>
+                    <tr>
+                        <td>Description :</td>
+                        <td><input type="text" id="editdescription" placeholder="description"></td>
+                    </tr>
+                    <tr>
+                        <td>Nation:</td>
+                        <td>
+                            <select id="editnation">
 
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" onclick="updateCity()">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-----------------------------------------Create-------------------------------------------->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -136,7 +238,10 @@
             </div>
             <div class="modal-body">
                 <table>
+                    <input type="text" id="editId" hidden="hidden">
+
                     <tr>
+
                         <td>City Name:</td>
                         <td><input type="text" id="cityName" placeholder="City Name"></td>
                     </tr>
